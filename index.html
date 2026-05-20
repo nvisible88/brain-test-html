@@ -400,19 +400,32 @@ function selectCountry(flag, name) {
   document.getElementById('countryModal').style.display = 'none';
 }
 
-// ── Storage ───────────────────────────────────────────────────────────────
-const LB_KEY = 'brain_test_v4_lb';
+// ── Supabase ───────────────────────────────────────────────────────────────
+const SUPA_URL = 'https://duqyasfjlkacqihzhojw.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1cXlhc2ZqbGthY3FpaHpob2p3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NTQ0NTYsImV4cCI6MjA5NDUzMDQ1Nn0.5JYJo9w3-BoaiqOe4Svdk_SBjkvr5GnGb22w1r4SUGY';
 
 async function getLeaderboard() {
   try {
-    const res = await window.storage.get(LB_KEY, true);
-    return res ? JSON.parse(res.value) : [];
+    const res = await fetch(`${SUPA_URL}/rest/v1/leaderboard?order=score.desc,time_ms.asc&limit=100`, {
+      headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}` }
+    });
+    if (!res.ok) return [];
+    return await res.json();
   } catch { return []; }
 }
 
-async function saveLeaderboard(entries) {
-  try { await window.storage.set(LB_KEY, JSON.stringify(entries), true); }
-  catch(e) { console.error('Storage error', e); }
+async function insertScore(entry) {
+  const res = await fetch(`${SUPA_URL}/rest/v1/leaderboard`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPA_KEY,
+      'Authorization': `Bearer ${SUPA_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify(entry)
+  });
+  return res.ok;
 }
 
 // ── Utilities ─────────────────────────────────────────────────────────────
@@ -667,14 +680,14 @@ async function submitScore(){
   btn.disabled=true; btn.textContent='Submitting…';
 
   const elapsed=quizEndTime-quizStartTime;
-  const entry={name:name.slice(0,20),flag:selectedCountry[0],country:selectedCountry[1],correct:answeredCorrectly,score,time:elapsed,ts:Date.now()};
-  const entries=await getLeaderboard();
-  entries.push(entry);
-  entries.sort((a,b)=>b.score!==a.score?b.score-a.score:a.time-b.time);
-  await saveLeaderboard(entries.slice(0,100));
-
-  document.getElementById('submitBox').style.display='none';
-  document.getElementById('submittedMsg').style.display='block';
+  const entry={name:name.slice(0,20),flag:selectedCountry[0],country:selectedCountry[1],correct:answeredCorrectly,score,time_ms:elapsed};
+  const ok=await insertScore(entry);
+  if(ok){
+    document.getElementById('submitBox').style.display='none';
+    document.getElementById('submittedMsg').style.display='block';
+  } else {
+    btn.disabled=false; btn.textContent='Try Again'; btn.style.background='var(--red)';
+  }
 }
 
 async function showLeaderboard(fromRes){
@@ -694,7 +707,7 @@ async function showLeaderboard(fromRes){
       <div class="lb-flag">${escHtml(e.flag||'🌍')}</div>
       <div class="lb-name">${escHtml(e.name)}</div>
       <div class="lb-pts">${e.score}</div>
-      <div class="lb-time">${formatTime(e.time)}</div>
+      <div class="lb-time">${formatTime(e.time_ms)}</div>
     </div>`;
   });
   table.innerHTML=html;
