@@ -31,6 +31,9 @@ unless explicitly asked. When in doubt, do less and confirm.
 - Message format: imperative, under 60 chars, body only when why is non-obvious
 - Co-author line required: `Co-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>`
 - Never push without user confirmation unless user explicitly authorizes it for the session
+- When code changes have been written but commit is paused for user verification,
+  surface a reminder at the start of every new task:
+  "Uncommitted changes from previous task — review and decide commit/discard before proceeding."
 
 ## Before Touching index.html
 - Confirm the change is in the active SPEC.md
