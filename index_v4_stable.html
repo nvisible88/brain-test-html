@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Brain Is Wired Differently</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f;
+  --card: #111118;
+  --border: #222230;
+  --accent: #7c6af7;
+  --accent2: #f7c36a;
+  --red: #f75a5a;
+  --green: #4fd18a;
+  --text: #f0eeff;
+  --muted: #7070a0;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Instrument Sans', sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-x: hidden;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 0;
+}
+.screen { position: relative; z-index: 1; width: 100%; max-width: 480px; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* INTRO */
+#intro { text-align: center; animation: fadeUp 0.6s ease both; }
+.badge {
+  display: inline-block;
+  background: rgba(124,106,247,0.15);
+  border: 1px solid rgba(124,106,247,0.3);
+  color: var(--accent);
+  font-size: 0.72rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+  padding: 5px 14px; border-radius: 20px; margin-bottom: 22px;
+}
+.intro-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(2rem,8vw,3rem); line-height: 1.08; margin-bottom: 18px; }
+.intro-title em { font-style: normal; color: var(--accent); }
+.intro-sub { color: var(--muted); font-size: 0.95rem; line-height: 1.65; max-width: 360px; margin: 0 auto 28px; }
+.intro-stats { display: flex; justify-content: center; gap: 28px; margin-bottom: 32px; }
+.stat { text-align: center; }
+.stat-n { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; color: var(--accent2); }
+.stat-l { font-size: 0.72rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 2px; }
+.btn-primary {
+  width: 100%; max-width: 320px;
+  background: var(--accent); color: #fff;
+  font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  padding: 18px 32px; border: none; border-radius: 4px; cursor: pointer;
+  transition: background 0.2s, transform 0.15s; display: block; margin: 0 auto;
+}
+.btn-primary:hover { background: #6a58e0; transform: translateY(-1px); }
+.btn-secondary {
+  width: 100%; max-width: 320px;
+  background: transparent; color: var(--muted);
+  font-family: 'Syne', sans-serif; font-size: 0.85rem; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  padding: 13px 32px; border: 1.5px solid var(--border); border-radius: 4px; cursor: pointer;
+  transition: border-color 0.2s, color 0.2s; display: block; margin: 10px auto 0;
+}
+.btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+.disclaimer { margin-top: 18px; font-size: 0.72rem; color: var(--muted); text-align: center; }
+
+/* QUIZ */
+#quiz { display: none; animation: fadeUp 0.4s ease both; }
+.quiz-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.q-num { font-size: 0.72rem; font-weight: 600; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+.score-pill {
+  background: rgba(124,106,247,0.12); border: 1px solid rgba(124,106,247,0.25);
+  color: var(--accent); font-family: 'Syne', sans-serif; font-size: 0.85rem; font-weight: 700;
+  padding: 3px 12px; border-radius: 20px;
+}
+.progress-track { height: 3px; background: var(--border); border-radius: 2px; margin-bottom: 6px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 2px; transition: width 0.4s ease; }
+.timer-track { height: 3px; background: var(--border); border-radius: 2px; margin-bottom: 20px; overflow: hidden; }
+.timer-fill { height: 100%; background: var(--accent2); border-radius: 2px; transition: width 0.08s linear, background 0.3s; }
+.difficulty-label { text-align: center; font-size: 0.65rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; transition: color 0.4s; }
+.prompt-text { font-family: 'Syne', sans-serif; font-weight: 700; font-size: clamp(0.9rem,3.5vw,1.1rem); text-align: center; letter-spacing: 0.5px; margin-bottom: 20px; min-height: 2.2em; line-height: 1.3; }
+.grid { display: grid; gap: 8px; margin-bottom: 16px; }
+@keyframes cellReveal { from { opacity: 0; transform: scale(0.85); } to { opacity: 1; transform: scale(1); } }
+.cell {
+  background: var(--card); border: 1.5px solid var(--border); border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: clamp(1.6rem,5.5vw,2.2rem); cursor: pointer;
+  transition: border-color 0.12s, background 0.12s, transform 0.1s;
+  user-select: none; aspect-ratio: 1; animation: cellReveal 0.2s ease both;
+}
+.cell:hover { border-color: var(--accent); transform: scale(1.05); }
+.cell.selected { border-color: var(--accent); background: rgba(124,106,247,0.18); }
+.cell.correct  { border-color: var(--green); background: rgba(79,209,138,0.15); }
+.cell.wrong    { border-color: var(--red);   background: rgba(247,90,90,0.15); }
+.feedback-row {
+  text-align: center; font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700;
+  letter-spacing: 1px; min-height: 24px; margin-bottom: 12px; color: transparent; transition: color 0.15s;
+}
+.feedback-row.ok  { color: var(--green); }
+.feedback-row.err { color: var(--red); }
+.confirm-btn {
+  width: 100%; background: var(--accent); color: #fff;
+  font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+  padding: 15px; border: none; border-radius: 4px; cursor: pointer;
+  opacity: 0.3; pointer-events: none; transition: opacity 0.2s, background 0.2s;
+}
+.confirm-btn.active { opacity: 1; pointer-events: all; }
+.confirm-btn.active:hover { background: #6a58e0; }
+@keyframes streakFlash {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(-4px) scale(0.9); }
+  30%  { opacity: 1; transform: translateX(-50%) translateY(0) scale(1.1); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-10px) scale(1); }
+}
+.streak-pop {
+  position: fixed; top: 20%; left: 50%; transform: translateX(-50%);
+  background: var(--accent2); color: #111; font-family: 'Syne', sans-serif;
+  font-weight: 800; font-size: 1rem; padding: 8px 20px; border-radius: 24px;
+  pointer-events: none; animation: streakFlash 1s ease forwards; z-index: 100; white-space: nowrap;
+}
+
+/* RESULT */
+#result { display: none; text-align: center; animation: fadeUp 0.6s ease both; }
+.result-badge { display: inline-block; font-size: 0.7rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; padding: 5px 14px; border-radius: 20px; margin-bottom: 16px; }
+.score-display { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(4rem,18vw,6.5rem); line-height: 1; margin-bottom: 6px; }
+.score-display span { color: var(--muted); font-size: 0.45em; }
+.result-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: clamp(1.1rem,4vw,1.5rem); margin-bottom: 16px; line-height: 1.15; }
+.result-bars { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 16px 0; text-align: left; }
+.bar-row { margin-bottom: 14px; }
+.bar-row:last-child { margin-bottom: 0; }
+.bar-label { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted); margin-bottom: 5px; font-weight: 600; }
+.bar-track { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 3px; width: 0; transition: width 1.2s cubic-bezier(0.25,1,0.5,1); }
+.result-desc { font-size: 0.88rem; color: var(--muted); line-height: 1.7; margin-bottom: 20px; }
+
+/* SUBMIT BOX */
+.submit-box { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 16px; }
+.submit-box h3 { font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 14px; color: var(--accent2); }
+
+.name-country-row { display: flex; gap: 8px; margin-bottom: 12px; }
+.name-input {
+  flex: 1; background: var(--bg); border: 1.5px solid var(--border); border-radius: 6px;
+  color: var(--text); font-family: 'Instrument Sans', sans-serif; font-size: 1rem;
+  padding: 12px 14px; outline: none; transition: border-color 0.2s;
+}
+.name-input:focus { border-color: var(--accent); }
+.name-input::placeholder { color: var(--muted); }
+
+/* Country picker */
+.country-btn {
+  background: var(--bg); border: 1.5px solid var(--border); border-radius: 6px;
+  color: var(--text); font-size: 1.5rem; padding: 0 14px; cursor: pointer;
+  transition: border-color 0.2s; white-space: nowrap; display: flex; align-items: center; gap: 6px;
+  min-width: 60px; justify-content: center;
+}
+.country-btn:hover { border-color: var(--accent); }
+
+.country-dropdown {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.8); z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+}
+.country-modal {
+  background: var(--card); border: 1px solid var(--border); border-radius: 16px;
+  width: 100%; max-width: 420px; max-height: 70vh; overflow: hidden;
+  display: flex; flex-direction: column;
+}
+.country-search {
+  padding: 14px 16px; border-bottom: 1px solid var(--border);
+  background: var(--bg); border-radius: 0; width: 100%;
+  color: var(--text); font-family: 'Instrument Sans', sans-serif; font-size: 0.95rem;
+  border: none; border-bottom: 1px solid var(--border); outline: none;
+  padding: 14px 16px;
+}
+.country-search::placeholder { color: var(--muted); }
+.country-list { overflow-y: auto; flex: 1; }
+.country-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 16px; cursor: pointer; font-size: 0.9rem;
+  transition: background 0.12s; border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.country-item:hover { background: rgba(124,106,247,0.1); }
+.country-item .flag { font-size: 1.4rem; }
+
+.submit-btn {
+  width: 100%; background: var(--accent2); color: #111;
+  font-family: 'Syne', sans-serif; font-size: 0.9rem; font-weight: 800;
+  letter-spacing: 2px; text-transform: uppercase; padding: 14px;
+  border: none; border-radius: 4px; cursor: pointer;
+  transition: opacity 0.2s, transform 0.15s;
+}
+.submit-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.submit-btn:disabled { opacity: 0.4; cursor: default; transform: none; }
+.submitted-msg { color: var(--green); font-family: 'Syne', sans-serif; font-size: 0.85rem; font-weight: 700; letter-spacing: 1px; text-align: center; padding: 10px 0 4px; }
+
+/* LEADERBOARD */
+#leaderboard { display: none; animation: fadeUp 0.5s ease both; }
+.lb-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.lb-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 1.4rem; letter-spacing: 1px; }
+.lb-title span { color: var(--accent); }
+.lb-back {
+  font-size: 0.75rem; color: var(--muted); font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+  cursor: pointer; border: 1px solid var(--border); padding: 5px 12px; border-radius: 4px;
+  transition: color 0.2s, border-color 0.2s;
+}
+.lb-back:hover { color: var(--accent); border-color: var(--accent); }
+.lb-table { background: var(--card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 20px; }
+.lb-col-header {
+  display: grid; grid-template-columns: 36px 28px 1fr 64px 64px;
+  padding: 10px 14px; background: rgba(124,106,247,0.08);
+  border-bottom: 1px solid var(--border);
+  font-size: 0.62rem; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted);
+}
+.lb-row {
+  display: grid; grid-template-columns: 36px 28px 1fr 64px 64px;
+  padding: 12px 14px; border-bottom: 1px solid var(--border);
+  align-items: center; transition: background 0.15s; animation: fadeUp 0.3s ease both;
+}
+.lb-row:last-child { border-bottom: none; }
+.lb-row:hover { background: rgba(255,255,255,0.03); }
+.lb-row.top1 { background: rgba(247,195,106,0.07); }
+.lb-row.top2 { background: rgba(124,106,247,0.05); }
+.lb-row.top3 { background: rgba(79,209,138,0.04); }
+.lb-rank { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 0.85rem; color: var(--muted); }
+.lb-row.top1 .lb-rank { color: var(--accent2); }
+.lb-row.top2 .lb-rank { color: var(--accent); }
+.lb-row.top3 .lb-rank { color: var(--green); }
+.lb-flag { font-size: 1.1rem; }
+.lb-name { font-weight: 600; font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding-right: 6px; }
+.lb-pts { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 0.88rem; color: var(--accent2); text-align: right; }
+.lb-time { font-size: 0.75rem; color: var(--muted); text-align: right; }
+.lb-empty { padding: 32px; text-align: center; color: var(--muted); font-size: 0.85rem; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner { display: inline-block; width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 8px; }
+.lb-loading { padding: 32px; text-align: center; color: var(--muted); font-size: 0.85rem; }
+</style>
+</head>
+<body>
+
+<!-- INTRO -->
+<div class="screen" id="intro">
+  <div class="badge">Neurodivergent Pattern Test</div>
+  <h1 class="intro-title">Your brain <em>notices</em><br>what others miss.</h1>
+  <p class="intro-sub">Intelligence agencies and research labs use pattern anomaly tests to identify non-standard cognitive wiring. 30 levels. Ranked globally.</p>
+  <div class="intro-stats">
+    <div class="stat"><div class="stat-n">30</div><div class="stat-l">Levels</div></div>
+    <div class="stat"><div class="stat-n">↑</div><div class="stat-l">Difficulty</div></div>
+    <div class="stat"><div class="stat-n">🌍</div><div class="stat-l">Global</div></div>
+  </div>
+  <button class="btn-primary" onclick="startQuiz()">Begin Test</button>
+  <button class="btn-secondary" onclick="showLeaderboard(false)">🏆 View Leaderboard</button>
+  <p class="disclaimer">For entertainment. Not a clinical diagnosis.</p>
+</div>
+
+<!-- QUIZ -->
+<div class="screen" id="quiz">
+  <div class="quiz-top">
+    <div class="q-num" id="qNum">Level 1 of 30</div>
+    <div class="score-pill" id="scorePill">0 pts</div>
+  </div>
+  <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+  <div class="timer-track"><div class="timer-fill" id="timerFill" style="width:100%"></div></div>
+  <div class="difficulty-label" id="diffLabel">Warm-Up</div>
+  <div class="prompt-text" id="promptText"></div>
+  <div class="grid" id="grid"></div>
+  <div class="feedback-row" id="feedbackRow"></div>
+  <button class="confirm-btn" id="confirmBtn" onclick="confirmAnswer()">Confirm</button>
+</div>
+
+<!-- RESULT -->
+<div class="screen" id="result">
+  <div class="result-badge" id="resultBadge"></div>
+  <div class="score-display" id="scoreDisplay">0<span>/30</span></div>
+  <div class="result-title" id="resultTitle"></div>
+  <div class="result-bars">
+    <div class="bar-row">
+      <div class="bar-label"><span>Processing Speed</span><span id="bv1">—</span></div>
+      <div class="bar-track"><div class="bar-fill" id="bf1" style="background:var(--accent)"></div></div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label"><span>Anomaly Detection</span><span id="bv2">—</span></div>
+      <div class="bar-track"><div class="bar-fill" id="bf2" style="background:var(--accent2)"></div></div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-label"><span>Pattern Depth</span><span id="bv3">—</span></div>
+      <div class="bar-track"><div class="bar-fill" id="bf3" style="background:var(--green)"></div></div>
+    </div>
+  </div>
+  <p class="result-desc" id="resultDesc"></p>
+
+  <div class="submit-box" id="submitBox">
+    <h3>🏆 Submit to Global Leaderboard</h3>
+    <div class="name-country-row">
+      <input class="name-input" id="nameInput" type="text" maxlength="20" placeholder="Your nickname…">
+      <button class="country-btn" id="countryBtn" onclick="openCountryPicker()">🌍</button>
+    </div>
+    <button class="submit-btn" id="submitBtn" onclick="submitScore()">Submit Score</button>
+    <div class="submitted-msg" id="submittedMsg" style="display:none">✓ Score submitted globally!</div>
+  </div>
+
+  <button class="btn-primary" style="margin-bottom:10px" onclick="showLeaderboard(true)">View Leaderboard</button>
+  <button class="btn-secondary" onclick="retryQuiz()">↻ Try Again</button>
+</div>
+
+<!-- LEADERBOARD -->
+<div class="screen" id="leaderboard">
+  <div class="lb-header">
+    <div class="lb-title">Leader<span>board</span></div>
+    <div class="lb-back" id="lbBack" onclick="backFromLeaderboard()">← Back</div>
+  </div>
+  <div class="lb-table" id="lbTable">
+    <div class="lb-loading"><span class="spinner"></span>Loading…</div>
+  </div>
+  <button class="btn-primary" onclick="startQuiz()">Play Now</button>
+</div>
+
+<!-- COUNTRY PICKER MODAL -->
+<div class="country-dropdown" id="countryModal" style="display:none" onclick="closeCountryPicker(event)">
+  <div class="country-modal" onclick="event.stopPropagation()">
+    <input class="country-search" id="countrySearch" type="text" placeholder="Search country…" oninput="filterCountries(this.value)">
+    <div class="country-list" id="countryList"></div>
+  </div>
+</div>
+
+<script>
+// ── Countries ─────────────────────────────────────────────────────────────
+const COUNTRIES = [
+  ['🇦🇫','Afghanistan'],['🇦🇱','Albania'],['🇩🇿','Algeria'],['🇦🇷','Argentina'],
+  ['🇦🇲','Armenia'],['🇦🇺','Australia'],['🇦🇹','Austria'],['🇦🇿','Azerbaijan'],
+  ['🇧🇭','Bahrain'],['🇧🇩','Bangladesh'],['🇧🇾','Belarus'],['🇧🇪','Belgium'],
+  ['🇧🇴','Bolivia'],['🇧🇦','Bosnia'],['🇧🇷','Brazil'],['🇧🇬','Bulgaria'],
+  ['🇰🇭','Cambodia'],['🇨🇦','Canada'],['🇨🇱','Chile'],['🇨🇳','China'],
+  ['🇨🇴','Colombia'],['🇭🇷','Croatia'],['🇨🇿','Czech Republic'],['🇩🇰','Denmark'],
+  ['🇪🇨','Ecuador'],['🇪🇬','Egypt'],['🇪🇪','Estonia'],['🇪🇹','Ethiopia'],
+  ['🇫🇮','Finland'],['🇫🇷','France'],['🇬🇪','Georgia'],['🇩🇪','Germany'],
+  ['🇬🇭','Ghana'],['🇬🇷','Greece'],['🇬🇹','Guatemala'],['🇭🇺','Hungary'],
+  ['🇮🇳','India'],['🇮🇩','Indonesia'],['🇮🇷','Iran'],['🇮🇶','Iraq'],
+  ['🇮🇪','Ireland'],['🇮🇱','Israel'],['🇮🇹','Italy'],['🇯🇵','Japan'],
+  ['🇯🇴','Jordan'],['🇰🇿','Kazakhstan'],['🇰🇪','Kenya'],['🇰🇷','South Korea'],
+  ['🇰🇼','Kuwait'],['🇱🇻','Latvia'],['🇱🇧','Lebanon'],['🇱🇾','Libya'],
+  ['🇱🇹','Lithuania'],['🇲🇾','Malaysia'],['🇲🇽','Mexico'],['🇲🇦','Morocco'],
+  ['🇳🇱','Netherlands'],['🇳🇿','New Zealand'],['🇳🇬','Nigeria'],['🇲🇰','North Macedonia'],
+  ['🇳🇴','Norway'],['🇴🇲','Oman'],['🇵🇰','Pakistan'],['🇵🇦','Panama'],
+  ['🇵🇪','Peru'],['🇵🇭','Philippines'],['🇵🇱','Poland'],['🇵🇹','Portugal'],
+  ['🇶🇦','Qatar'],['🇷🇴','Romania'],['🇷🇺','Russia'],['🇸🇦','Saudi Arabia'],
+  ['🇷🇸','Serbia'],['🇸🇬','Singapore'],['🇸🇰','Slovakia'],['🇸🇮','Slovenia'],
+  ['🇿🇦','South Africa'],['🇪🇸','Spain'],['🇱🇰','Sri Lanka'],['🇸🇪','Sweden'],
+  ['🇨🇭','Switzerland'],['🇸🇾','Syria'],['🇹🇼','Taiwan'],['🇹🇿','Tanzania'],
+  ['🇹🇭','Thailand'],['🇹🇳','Tunisia'],['🇹🇷','Turkey'],['🇺🇦','Ukraine'],
+  ['🇦🇪','UAE'],['🇬🇧','United Kingdom'],['🇺🇸','United States'],['🇺🇾','Uruguay'],
+  ['🇺🇿','Uzbekistan'],['🇻🇪','Venezuela'],['🇻🇳','Vietnam'],['🇾🇪','Yemen'],
+  ['🇿🇲','Zambia'],['🇿🇼','Zimbabwe'],
+];
+
+let selectedCountry = ['🌍', 'Global'];
+
+function renderCountryList(filter='') {
+  const list = document.getElementById('countryList');
+  const filtered = filter
+    ? COUNTRIES.filter(c => c[1].toLowerCase().includes(filter.toLowerCase()))
+    : COUNTRIES;
+  list.innerHTML = filtered.map(c =>
+    `<div class="country-item" onclick="selectCountry('${c[0]}','${c[1].replace(/'/g,"\\'")}')">
+      <span class="flag">${c[0]}</span><span>${c[1]}</span>
+    </div>`
+  ).join('');
+}
+
+function openCountryPicker() {
+  document.getElementById('countryModal').style.display = 'flex';
+  document.getElementById('countrySearch').value = '';
+  renderCountryList();
+  setTimeout(() => document.getElementById('countrySearch').focus(), 100);
+}
+
+function closeCountryPicker(e) {
+  document.getElementById('countryModal').style.display = 'none';
+}
+
+function filterCountries(val) { renderCountryList(val); }
+
+function selectCountry(flag, name) {
+  selectedCountry = [flag, name];
+  document.getElementById('countryBtn').textContent = flag;
+  document.getElementById('countryModal').style.display = 'none';
+}
+
+// ── Supabase ───────────────────────────────────────────────────────────────
+const SUPA_URL = 'https://duqyasfjlkacqihzhojw.supabase.co';
+const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR1cXlhc2ZqbGthY3FpaHpob2p3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NTQ0NTYsImV4cCI6MjA5NDUzMDQ1Nn0.5JYJo9w3-BoaiqOe4Svdk_SBjkvr5GnGb22w1r4SUGY';
+
+async function getLeaderboard() {
+  try {
+    const res = await fetch(`${SUPA_URL}/rest/v1/leaderboard?order=score.desc,time_ms.asc&limit=100`, {
+      headers: { 'apikey': SUPA_KEY, 'Authorization': `Bearer ${SUPA_KEY}` }
+    });
+    if (!res.ok) return [];
+    return await res.json();
+  } catch { return []; }
+}
+
+async function insertScore(entry) {
+  const res = await fetch(`${SUPA_URL}/rest/v1/leaderboard`, {
+    method: 'POST',
+    headers: {
+      'apikey': SUPA_KEY,
+      'Authorization': `Bearer ${SUPA_KEY}`,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal'
+    },
+    body: JSON.stringify(entry)
+  });
+  return res.ok;
+}
+
+// ── Utilities ─────────────────────────────────────────────────────────────
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i>0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+function formatTime(ms) {
+  const s = Math.floor(ms/1000), m = Math.floor(s/60);
+  return m > 0 ? `${m}m ${s%60}s` : `${s}s`;
+}
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function makeQ(base, odd, cols, prompt, tier) {
+  const count = cols*cols, items = Array(count-1).fill(base);
+  const oddIdx = Math.floor(Math.random()*count);
+  items.splice(oddIdx,0,odd);
+  return { items, odd:oddIdx, cols, prompt, tier };
+}
+
+// ── Questions ─────────────────────────────────────────────────────────────
+const TIER1_DEF = [
+  ['O','0',3,'Letter or number?',1],
+  ['→','↑',3,'One arrow points differently',1],
+  ['◼','◻',3,'Filled or hollow?',1],
+  ['F','E',3,'One letter is different',1],
+  ['🔵','🟦',3,'Shape or circle?',1],
+  ['▲','△',3,'Filled or hollow triangle?',1],
+];
+const TIER2_DEF = [
+  ['F','Ƒ',4,'One character has a tail — find it',2],
+  ['8','B',4,'Number or letter?',2],
+  ['1','l',4,'Number or lowercase L?',2],
+  ['N','И',4,'One letter is mirrored',2],
+  ['Z','2',4,'Number disguised as a letter',2],
+  ['p','q',4,'One faces the wrong way',2],
+  ['C','G',4,'One has an extra detail',2],
+  ['6','9',4,'One is rotated — which?',2],
+];
+const TIER3_DEF = [
+  ['|||','||||',4,'Count the strokes',3],
+  ['π','n',4,'One is Greek — find it',3],
+  ['∞','8',4,'Rotated look-alike',3],
+  ['d','b',4,'Mirror image — spot it',3],
+  ['U','∪',4,'Symbol vs letter',3],
+  ['M','W',4,'One is upside down',3],
+  ['≡','≠',4,'One symbol breaks the set',3],
+  ['S','5',4,'Letter or number — fast',3],
+];
+const TIER4_DEF = [
+  ['⬡','⬢',5,'Hollow or filled hexagon?',4],
+  ['♦','♢',5,'Filled or outline diamond?',4],
+  ['☐','☑',5,'One box is checked',4],
+  ['#','井',5,'Similar but not the same',4],
+  ['≈','~',5,'Almost identical — almost',4],
+  ['0','O',5,'Zero or the letter O?',4],
+  ['←','↩',5,'One arrow curves — find it',4],
+  ['rn','m',5,'Two letters fused — find it',4],
+];
+const TIER5_DEF = [
+  ['lI','Il',5,'Sequence reversed — spot it',5],
+  ['vv','w',5,'Two v\'s or one w?',5],
+  ['cl','d',5,'Two letters or one?',5],
+  ['1l','ll',5,'One has a number — find it',5],
+  ['ij','íj',5,'One has an accent — find it',5],
+  ['qq','qp',5,'One character has a different tail',5],
+  ['nn','m',5,'Count the humps',5],
+  ['oo','ø',5,'One has a slash through it',5],
+];
+
+function buildRun() {
+  return [
+    ...shuffle(TIER1_DEF).slice(0,5).map(d=>makeQ(...d)),
+    ...shuffle(TIER2_DEF).slice(0,7).map(d=>makeQ(...d)),
+    ...shuffle(TIER3_DEF).slice(0,7).map(d=>makeQ(...d)),
+    ...shuffle(TIER4_DEF).slice(0,6).map(d=>makeQ(...d)),
+    ...shuffle(TIER5_DEF).slice(0,5).map(d=>makeQ(...d)),
+  ];
+}
+
+const TIER_TIME  = {1:8000,2:6500,3:5500,4:5000,5:4000};
+const TIER_NAME  = {1:'Warm-Up',2:'Easy',3:'Medium',4:'Hard',5:'Expert'};
+const TIER_COLOR = {1:'#7070a0',2:'#4fd18a',3:'#f7c36a',4:'#f79a3a',5:'#f75a5a'};
+
+// ── State ─────────────────────────────────────────────────────────────────
+let questions=[],current=0,score=0,selected=null;
+let timerInterval=null,timeLeft=0,totalTime=0;
+let streak=0,bestStreak=0,speedBonusTotal=0,answeredCorrectly=0;
+let sectionScores=[0,0,0,0,0],sectionCounts=[0,0,0,0,0];
+let quizStartTime=0,quizEndTime=0;
+let fromResult=false;
+
+function showScreen(id) {
+  ['intro','quiz','result','leaderboard'].forEach(s => {
+    document.getElementById(s).style.display = s===id ? 'block' : 'none';
+  });
+}
+
+function startQuiz() {
+  questions=buildRun(); current=0; score=0; selected=null;
+  streak=0; bestStreak=0; speedBonusTotal=0; answeredCorrectly=0;
+  sectionScores=[0,0,0,0,0]; sectionCounts=[0,0,0,0,0];
+  quizStartTime=Date.now();
+  showScreen('quiz');
+  loadQuestion();
+}
+function retryQuiz() { startQuiz(); }
+
+function backFromLeaderboard() { showScreen(fromResult?'result':'intro'); }
+
+function loadQuestion() {
+  selected=null;
+  document.getElementById('confirmBtn').classList.remove('active');
+  const fb=document.getElementById('feedbackRow');
+  fb.className='feedback-row'; fb.textContent='';
+
+  const q=questions[current];
+  document.getElementById('qNum').textContent=`Level ${current+1} of 30`;
+  document.getElementById('scorePill').textContent=`${score} pts`;
+  document.getElementById('progressFill').style.width=`${(current/30)*100}%`;
+  const dl=document.getElementById('diffLabel');
+  dl.textContent=TIER_NAME[q.tier]; dl.style.color=TIER_COLOR[q.tier];
+  document.getElementById('promptText').textContent=q.prompt;
+
+  const grid=document.getElementById('grid');
+  grid.style.gridTemplateColumns=`repeat(${q.cols},1fr)`;
+  grid.innerHTML='';
+  q.items.forEach((item,i)=>{
+    const cell=document.createElement('div');
+    cell.className='cell'; cell.textContent=item;
+    cell.style.animationDelay=`${i*0.025}s`;
+    cell.style.fontSize=q.cols>=5?'clamp(1.1rem,3.5vw,1.55rem)':'clamp(1.6rem,5.5vw,2.2rem)';
+    cell.onclick=()=>selectCell(i);
+    grid.appendChild(cell);
+  });
+  startTimer(TIER_TIME[q.tier]);
+}
+
+function startTimer(ms) {
+  clearInterval(timerInterval);
+  timeLeft=ms; totalTime=ms;
+  const fill=document.getElementById('timerFill');
+  fill.style.width='100%'; fill.style.background='var(--accent2)';
+  timerInterval=setInterval(()=>{
+    timeLeft-=60;
+    const pct=Math.max(0,timeLeft/totalTime*100);
+    fill.style.width=pct+'%';
+    if(pct<30) fill.style.background='var(--red)';
+    else if(pct<60) fill.style.background='#f79a3a';
+    else fill.style.background='var(--accent2)';
+    if(timeLeft<=0){clearInterval(timerInterval);resolve(false);}
+  },60);
+}
+
+function selectCell(idx) {
+  const fb=document.getElementById('feedbackRow');
+  if(fb.classList.contains('ok')||fb.classList.contains('err')) return;
+  selected=idx;
+  document.querySelectorAll('.cell').forEach(c=>c.classList.remove('selected'));
+  document.querySelectorAll('.cell')[idx].classList.add('selected');
+  document.getElementById('confirmBtn').classList.add('active');
+}
+
+function confirmAnswer(){clearInterval(timerInterval);resolve(true);}
+
+function resolve(userAnswered){
+  clearInterval(timerInterval);
+  const q=questions[current];
+  const correct=userAnswered&&selected===q.odd;
+  const cells=document.querySelectorAll('.cell');
+  cells[q.odd].classList.add('correct');
+  if(selected!==null&&selected!==q.odd) cells[selected].classList.add('wrong');
+  const fb=document.getElementById('feedbackRow');
+  if(correct){
+    const sr=timeLeft/totalTime, sb=Math.round(sr*5), pts=10+sb;
+    score+=pts; streak++; answeredCorrectly++;
+    if(streak>bestStreak) bestStreak=streak;
+    speedBonusTotal+=sb;
+    sectionScores[q.tier-1]++; sectionCounts[q.tier-1]++;
+    fb.textContent=streak>=3?`🔥 ${streak}× STREAK  +${pts}`:`✓ +${pts} pts`;
+    fb.className='feedback-row ok';
+    if(streak===3||streak===5||streak===10) showStreakPop(streak);
+  } else {
+    streak=0; sectionCounts[q.tier-1]++;
+    fb.textContent=selected===null?'✗ Time\'s up':'✗ Wrong';
+    fb.className='feedback-row err';
+  }
+  document.getElementById('confirmBtn').classList.remove('active');
+  document.getElementById('scorePill').textContent=`${score} pts`;
+  setTimeout(()=>{ current++; if(current<questions.length) loadQuestion(); else showResult(); },850);
+}
+
+function showStreakPop(n){
+  const el=document.createElement('div');
+  el.className='streak-pop';
+  el.textContent=n>=10?'🧠 INCREDIBLE — 10 STREAK':n>=5?'⚡ ON FIRE — 5 STREAK':'🔥 3 IN A ROW';
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(),1100);
+}
+
+function showResult(){
+  quizEndTime=Date.now();
+  fromResult=true;
+  showScreen('result');
+  document.getElementById('scoreDisplay').innerHTML=`${answeredCorrectly}<span>/30</span>`;
+  document.getElementById('submittedMsg').style.display='none';
+  document.getElementById('submitBtn').disabled=false;
+  document.getElementById('submitBtn').textContent='Submit Score';
+  document.getElementById('nameInput').value='';
+  document.getElementById('submitBox').style.display='block';
+  selectedCountry=['🌍','Global'];
+  document.getElementById('countryBtn').textContent='🌍';
+
+  const speed=Math.min(100,Math.round((speedBonusTotal/(answeredCorrectly*5+0.01))*100));
+  const anomaly=Math.min(100,Math.round((answeredCorrectly/30)*100));
+  const hc=sectionScores[3]+sectionScores[4], ht=(sectionCounts[3]+sectionCounts[4])||1;
+  const depth=Math.min(100,Math.round((hc/ht)*100));
+
+  let badge,color,title,desc;
+  if(answeredCorrectly>=27){badge='◈ EXCEPTIONAL PATTERN MIND';color='#7c6af7';title='Your brain processes anomalies at a neurologically rare level.';desc='Fewer than 3% of test-takers reach this score. Your visual processing operates at an exceptional level.';}
+  else if(answeredCorrectly>=22){badge='◈ HIGH ANOMALY SENSITIVITY';color='#4fd18a';title='You catch subtle patterns most people walk right past.';desc='Strong performance on the harder levels. A clear strength in rapid anomaly detection.';}
+  else if(answeredCorrectly>=16){badge='◈ SOLID PATTERN PROCESSOR';color='#f7c36a';title='Reliable, consistent pattern recognition with room to push.';desc='You handled easy and mid tiers well. The expert levels are where you can still develop.';}
+  else if(answeredCorrectly>=10){badge='◈ DEVELOPING PATTERN SENSE';color='#f79a3a';title='Pattern recognition is a trainable skill — and you\'re training.';desc='The timer pressure caught you on the harder questions. This improves with practice.';}
+  else{badge='◈ PATTERN NOVICE';color='#f75a5a';title='Either the timer beat you, or this test isn\'t your format.';desc='Not everyone\'s brain is wired for rapid visual anomaly detection — and that\'s perfectly fine.';}
+
+  const rb=document.getElementById('resultBadge');
+  rb.textContent=badge; rb.style.background=color+'22'; rb.style.border=`1px solid ${color}55`; rb.style.color=color;
+  document.getElementById('resultTitle').textContent=title;
+  document.getElementById('resultDesc').textContent=desc;
+  setTimeout(()=>{ animateBar('bf1','bv1',speed); animateBar('bf2','bv2',anomaly); animateBar('bf3','bv3',depth); },300);
+}
+
+function animateBar(fid,vid,pct){
+  document.getElementById(fid).style.width=pct+'%';
+  document.getElementById(vid).textContent=pct+'%';
+}
+
+async function submitScore(){
+  const name=document.getElementById('nameInput').value.trim();
+  if(!name){
+    document.getElementById('nameInput').focus();
+    document.getElementById('nameInput').style.borderColor='var(--red)';
+    setTimeout(()=>document.getElementById('nameInput').style.borderColor='',1000);
+    return;
+  }
+  const btn=document.getElementById('submitBtn');
+  btn.disabled=true; btn.textContent='Submitting…';
+
+  const elapsed=quizEndTime-quizStartTime;
+  const entry={name:name.slice(0,20),flag:selectedCountry[0],country:selectedCountry[1],correct:answeredCorrectly,score,time_ms:elapsed};
+  const ok=await insertScore(entry);
+  if(ok){
+    document.getElementById('submitBox').style.display='none';
+    document.getElementById('submittedMsg').style.display='block';
+  } else {
+    btn.disabled=false; btn.textContent='Try Again'; btn.style.background='var(--red)';
+  }
+}
+
+async function showLeaderboard(fromRes){
+  fromResult=fromRes;
+  showScreen('leaderboard');
+  const table=document.getElementById('lbTable');
+  table.innerHTML='<div class="lb-loading"><span class="spinner"></span>Loading global scores…</div>';
+  const entries=await getLeaderboard();
+  if(!entries.length){ table.innerHTML='<div class="lb-empty">No scores yet — be the first!</div>'; return; }
+
+  let html=`<div class="lb-col-header"><div>#</div><div>🌍</div><div>Name</div><div style="text-align:right">Pts</div><div style="text-align:right">Time</div></div>`;
+  entries.forEach((e,i)=>{
+    const rc=i===0?'top1':i===1?'top2':i===2?'top3':'';
+    const ri=i===0?'🥇':i===1?'🥈':i===2?'🥉':`${i+1}`;
+    html+=`<div class="lb-row ${rc}" style="animation-delay:${i*0.04}s">
+      <div class="lb-rank">${ri}</div>
+      <div class="lb-flag">${escHtml(e.flag||'🌍')}</div>
+      <div class="lb-name">${escHtml(e.name)}</div>
+      <div class="lb-pts">${parseInt(e.score)}</div>
+      <div class="lb-time">${formatTime(parseInt(e.time_ms))}</div>
+    </div>`;
+  });
+  table.innerHTML=html;
+}
+</script>
+</body>
+</html>
