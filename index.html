@@ -262,6 +262,10 @@ body::before {
     <div class="stat"><div class="stat-n">↑</div><div class="stat-l">Difficulty</div></div>
     <div class="stat"><div class="stat-n">🌍</div><div class="stat-l">Global</div></div>
   </div>
+  <div class="name-country-row" style="max-width:320px;margin:0 auto 16px">
+    <input class="name-input" id="introNameInput" type="text" maxlength="20" placeholder="Your nickname…">
+    <button class="country-btn" id="introCountryBtn" onclick="openCountryPicker('introCountryBtn')">🌍</button>
+  </div>
   <button class="btn-primary" onclick="startQuiz()">Begin Test</button>
   <button class="btn-secondary" onclick="showLeaderboard(false)">🏆 View Leaderboard</button>
   <p class="disclaimer">For entertainment. Not a clinical diagnosis.</p>
@@ -303,11 +307,13 @@ body::before {
   </div>
   <p class="result-desc" id="resultDesc"></p>
 
+  <button class="btn-secondary" id="shareBtn" onclick="shareScore()" style="margin-bottom:12px">↗ Share Score</button>
+
   <div class="submit-box" id="submitBox">
     <h3>🏆 Submit to Global Leaderboard</h3>
     <div class="name-country-row">
       <input class="name-input" id="nameInput" type="text" maxlength="20" placeholder="Your nickname…">
-      <button class="country-btn" id="countryBtn" onclick="openCountryPicker()">🌍</button>
+      <button class="country-btn" id="countryBtn" onclick="openCountryPicker('countryBtn')">🌍</button>
     </div>
     <button class="submit-btn" id="submitBtn" onclick="submitScore()">Submit Score</button>
     <div class="submitted-msg" id="submittedMsg" style="display:none">✓ Score submitted globally!</div>
@@ -326,7 +332,7 @@ body::before {
   <div class="lb-table" id="lbTable">
     <div class="lb-loading"><span class="spinner"></span>Loading…</div>
   </div>
-  <button class="btn-primary" onclick="startQuiz()">Play Now</button>
+  <button class="btn-primary" onclick="showScreen('intro')">Play Now</button>
 </div>
 
 <!-- COUNTRY PICKER MODAL -->
@@ -381,7 +387,8 @@ function renderCountryList(filter='') {
   ).join('');
 }
 
-function openCountryPicker() {
+function openCountryPicker(btnId) {
+  currentCountryBtnId = btnId || 'countryBtn';
   document.getElementById('countryModal').style.display = 'flex';
   document.getElementById('countrySearch').value = '';
   renderCountryList();
@@ -396,7 +403,10 @@ function filterCountries(val) { renderCountryList(val); }
 
 function selectCountry(flag, name) {
   selectedCountry = [flag, name];
-  document.getElementById('countryBtn').textContent = flag;
+  document.getElementById(currentCountryBtnId).textContent = flag;
+  const other = currentCountryBtnId === 'introCountryBtn' ? 'countryBtn' : 'introCountryBtn';
+  const otherEl = document.getElementById(other);
+  if (otherEl) otherEl.textContent = flag;
   document.getElementById('countryModal').style.display = 'none';
 }
 
@@ -522,6 +532,8 @@ let streak=0,bestStreak=0,speedBonusTotal=0,answeredCorrectly=0;
 let sectionScores=[0,0,0,0,0],sectionCounts=[0,0,0,0,0];
 let quizStartTime=0,quizEndTime=0;
 let fromResult=false;
+let playerName='',currentCountryBtnId='introCountryBtn';
+let resultBadge='',resultBadgeColor='';
 
 function showScreen(id) {
   ['intro','quiz','result','leaderboard'].forEach(s => {
@@ -530,6 +542,14 @@ function showScreen(id) {
 }
 
 function startQuiz() {
+  const nameEl=document.getElementById('introNameInput');
+  const n=nameEl.value.trim();
+  if(!n){
+    nameEl.style.borderColor='var(--red)';
+    setTimeout(()=>nameEl.style.borderColor='',1000);
+    return;
+  }
+  playerName=n;
   questions=buildRun(); current=0; score=0; selected=null;
   streak=0; bestStreak=0; speedBonusTotal=0; answeredCorrectly=0;
   sectionScores=[0,0,0,0,0]; sectionCounts=[0,0,0,0,0];
@@ -537,7 +557,7 @@ function startQuiz() {
   showScreen('quiz');
   loadQuestion();
 }
-function retryQuiz() { startQuiz(); }
+function retryQuiz() { showScreen('intro'); }
 
 function backFromLeaderboard() { showScreen(fromResult?'result':'intro'); }
 
@@ -639,10 +659,9 @@ function showResult(){
   document.getElementById('submittedMsg').style.display='none';
   document.getElementById('submitBtn').disabled=false;
   document.getElementById('submitBtn').textContent='Submit Score';
-  document.getElementById('nameInput').value='';
+  document.getElementById('nameInput').value=playerName;
   document.getElementById('submitBox').style.display='block';
-  selectedCountry=['🌍','Global'];
-  document.getElementById('countryBtn').textContent='🌍';
+  document.getElementById('countryBtn').textContent=selectedCountry[0];
 
   const speed=Math.min(100,Math.round((speedBonusTotal/(answeredCorrectly*5+0.01))*100));
   const anomaly=Math.min(100,Math.round((answeredCorrectly/30)*100));
@@ -656,6 +675,7 @@ function showResult(){
   else if(answeredCorrectly>=10){badge='◈ DEVELOPING PATTERN SENSE';color='#f79a3a';title='Pattern recognition is a trainable skill — and you\'re training.';desc='The timer pressure caught you on the harder questions. This improves with practice.';}
   else{badge='◈ PATTERN NOVICE';color='#f75a5a';title='Either the timer beat you, or this test isn\'t your format.';desc='Not everyone\'s brain is wired for rapid visual anomaly detection — and that\'s perfectly fine.';}
 
+  resultBadge=badge; resultBadgeColor=color;
   const rb=document.getElementById('resultBadge');
   rb.textContent=badge; rb.style.background=color+'22'; rb.style.border=`1px solid ${color}55`; rb.style.color=color;
   document.getElementById('resultTitle').textContent=title;
@@ -666,6 +686,69 @@ function showResult(){
 function animateBar(fid,vid,pct){
   document.getElementById(fid).style.width=pct+'%';
   document.getElementById(vid).textContent=pct+'%';
+}
+
+async function shareScore(){
+  const W=960,H=540;
+  const canvas=document.createElement('canvas');
+  canvas.width=W; canvas.height=H;
+  const ctx=canvas.getContext('2d');
+
+  ctx.fillStyle='#0a0a0f';
+  ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#222230';
+  ctx.lineWidth=2;
+  ctx.strokeRect(1,1,W-2,H-2);
+
+  ctx.textBaseline='alphabetic';
+  ctx.textAlign='center';
+  ctx.font='600 28px system-ui,-apple-system,Arial,sans-serif';
+  ctx.fillStyle=resultBadgeColor;
+  ctx.fillText(resultBadge,W/2,140);
+
+  const numStr=String(answeredCorrectly);
+  const fracStr=' /30';
+  const NUM_FONT='bold 148px system-ui,-apple-system,Arial,sans-serif';
+  const FRAC_FONT='bold 64px system-ui,-apple-system,Arial,sans-serif';
+  ctx.font=NUM_FONT;
+  const numW=ctx.measureText(numStr).width;
+  ctx.font=FRAC_FONT;
+  const fracW=ctx.measureText(fracStr).width;
+  const bx=(W-(numW+fracW))/2;
+
+  ctx.font=NUM_FONT;
+  ctx.fillStyle='#f0eeff';
+  ctx.textAlign='left';
+  ctx.fillText(numStr,bx,320);
+  ctx.font=FRAC_FONT;
+  ctx.fillStyle='#7070a0';
+  ctx.fillText(fracStr,bx+numW,298);
+
+  ctx.font='32px system-ui,-apple-system,Arial,sans-serif';
+  ctx.fillStyle='#7070a0';
+  ctx.textAlign='center';
+  ctx.fillText('correct answers',W/2,388);
+
+  ctx.font='26px system-ui,-apple-system,Arial,sans-serif';
+  ctx.fillStyle='#5a5a80';
+  ctx.fillText('nvisible88.github.io/brain-test-html',W/2,H-48);
+
+  canvas.toBlob(async blob=>{
+    const file=new File([blob],'brain-test-result.png',{type:'image/png'});
+    if(navigator.share&&navigator.canShare?.({files:[file]})){
+      try{ await navigator.share({files:[file],title:'My Brain Test Result'}); }
+      catch(e){ if(e.name!=='AbortError') fallbackDownload(canvas); }
+    } else {
+      fallbackDownload(canvas);
+    }
+  },'image/png');
+}
+
+function fallbackDownload(canvas){
+  const a=document.createElement('a');
+  a.download='brain-test-result.png';
+  a.href=canvas.toDataURL('image/png');
+  a.click();
 }
 
 async function submitScore(){

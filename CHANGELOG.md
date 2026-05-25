@@ -1,5 +1,18 @@
 # Changelog
 
+## [v1] — 2026-05-22
+
+### Added
+- Name and country picker on the intro screen — player identifies before the test begins
+- "Begin Test" requires a non-empty nickname (red border flash if blank)
+- Result screen pre-populates name and country from intro entry (editable)
+- Country selection syncs between intro and result screen pickers
+- Share Score button on result screen — generates a 960×540 PNG card via Canvas API
+- Card shows badge tier, correct count, "/30", and site URL at the bottom
+- Web Share API used on mobile; falls back to PNG download on desktop
+- Leaderboard "Play Now" routes to intro screen (ensures name is always entered)
+- Retry routes back to intro screen with name pre-filled
+
 All notable changes to brain-test-html are recorded here.
 Format: `## [version] — YYYY-MM-DD` with sections Added / Changed / Fixed.
 
