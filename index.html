@@ -452,62 +452,62 @@ function makeQ(base, odd, cols, prompt, tier) {
 }
 
 // ── Questions ─────────────────────────────────────────────────────────────
-const TIER1 = [
-  makeQ('O','0',3,'Letter or number?',1),
-  makeQ('→','↑',3,'One arrow points differently',1),
-  makeQ('◼','◻',3,'Filled or hollow?',1),
-  makeQ('F','E',3,'One letter is different',1),
-  makeQ('🔵','🟦',3,'Shape or circle?',1),
-  makeQ('▲','△',3,'Filled or hollow triangle?',1),
+const TIER1_DEF = [
+  ['O','0',3,'Letter or number?',1],
+  ['→','↑',3,'One arrow points differently',1],
+  ['◼','◻',3,'Filled or hollow?',1],
+  ['F','E',3,'One letter is different',1],
+  ['🔵','🟦',3,'Shape or circle?',1],
+  ['▲','△',3,'Filled or hollow triangle?',1],
 ];
-const TIER2 = [
-  makeQ('F','Ƒ',4,'One character has a tail — find it',2),
-  makeQ('8','B',4,'Number or letter?',2),
-  makeQ('1','l',4,'Number or lowercase L?',2),
-  makeQ('N','И',4,'One letter is mirrored',2),
-  makeQ('Z','2',4,'Number disguised as a letter',2),
-  makeQ('p','q',4,'One faces the wrong way',2),
-  makeQ('C','G',4,'One has an extra detail',2),
-  makeQ('6','9',4,'One is rotated — which?',2),
+const TIER2_DEF = [
+  ['F','Ƒ',4,'One character has a tail — find it',2],
+  ['8','B',4,'Number or letter?',2],
+  ['1','l',4,'Number or lowercase L?',2],
+  ['N','И',4,'One letter is mirrored',2],
+  ['Z','2',4,'Number disguised as a letter',2],
+  ['p','q',4,'One faces the wrong way',2],
+  ['C','G',4,'One has an extra detail',2],
+  ['6','9',4,'One is rotated — which?',2],
 ];
-const TIER3 = [
-  makeQ('|||','||||',4,'Count the strokes',3),
-  makeQ('π','n',4,'One is Greek — find it',3),
-  makeQ('∞','8',4,'Rotated look-alike',3),
-  makeQ('d','b',4,'Mirror image — spot it',3),
-  makeQ('U','∪',4,'Symbol vs letter',3),
-  makeQ('M','W',4,'One is upside down',3),
-  makeQ('≡','≠',4,'One symbol breaks the set',3),
-  makeQ('S','5',4,'Letter or number — fast',3),
+const TIER3_DEF = [
+  ['|||','||||',4,'Count the strokes',3],
+  ['π','n',4,'One is Greek — find it',3],
+  ['∞','8',4,'Rotated look-alike',3],
+  ['d','b',4,'Mirror image — spot it',3],
+  ['U','∪',4,'Symbol vs letter',3],
+  ['M','W',4,'One is upside down',3],
+  ['≡','≠',4,'One symbol breaks the set',3],
+  ['S','5',4,'Letter or number — fast',3],
 ];
-const TIER4 = [
-  makeQ('⬡','⬢',5,'Hollow or filled hexagon?',4),
-  makeQ('♦','♢',5,'Filled or outline diamond?',4),
-  makeQ('☐','☑',5,'One box is checked',4),
-  makeQ('#','井',5,'Similar but not the same',4),
-  makeQ('≈','~',5,'Almost identical — almost',4),
-  makeQ('0','O',5,'Zero or the letter O?',4),
-  makeQ('←','↩',5,'One arrow curves — find it',4),
-  makeQ('rn','m',5,'Two letters fused — find it',4),
+const TIER4_DEF = [
+  ['⬡','⬢',5,'Hollow or filled hexagon?',4],
+  ['♦','♢',5,'Filled or outline diamond?',4],
+  ['☐','☑',5,'One box is checked',4],
+  ['#','井',5,'Similar but not the same',4],
+  ['≈','~',5,'Almost identical — almost',4],
+  ['0','O',5,'Zero or the letter O?',4],
+  ['←','↩',5,'One arrow curves — find it',4],
+  ['rn','m',5,'Two letters fused — find it',4],
 ];
-const TIER5 = [
-  makeQ('lI','Il',5,'Sequence reversed — spot it',5),
-  makeQ('vv','w',5,'Two v\'s or one w?',5),
-  makeQ('cl','d',5,'Two letters or one?',5),
-  makeQ('1l','ll',5,'One has a number — find it',5),
-  makeQ('ij','íj',5,'One has an accent — find it',5),
-  makeQ('rn','m',5,'Are those two letters or one?',5),
-  makeQ('nn','m',5,'Count the humps',5),
-  makeQ('oo','ø',5,'One has a slash through it',5),
+const TIER5_DEF = [
+  ['lI','Il',5,'Sequence reversed — spot it',5],
+  ['vv','w',5,'Two v\'s or one w?',5],
+  ['cl','d',5,'Two letters or one?',5],
+  ['1l','ll',5,'One has a number — find it',5],
+  ['ij','íj',5,'One has an accent — find it',5],
+  ['qq','qp',5,'One character has a different tail',5],
+  ['nn','m',5,'Count the humps',5],
+  ['oo','ø',5,'One has a slash through it',5],
 ];
 
 function buildRun() {
   return [
-    ...shuffle(TIER1).slice(0,5),
-    ...shuffle(TIER2).slice(0,7),
-    ...shuffle(TIER3).slice(0,7),
-    ...shuffle(TIER4).slice(0,6),
-    ...shuffle(TIER5).slice(0,5),
+    ...shuffle(TIER1_DEF).slice(0,5).map(d=>makeQ(...d)),
+    ...shuffle(TIER2_DEF).slice(0,7).map(d=>makeQ(...d)),
+    ...shuffle(TIER3_DEF).slice(0,7).map(d=>makeQ(...d)),
+    ...shuffle(TIER4_DEF).slice(0,6).map(d=>makeQ(...d)),
+    ...shuffle(TIER5_DEF).slice(0,5).map(d=>makeQ(...d)),
   ];
 }
 
@@ -706,8 +706,8 @@ async function showLeaderboard(fromRes){
       <div class="lb-rank">${ri}</div>
       <div class="lb-flag">${escHtml(e.flag||'🌍')}</div>
       <div class="lb-name">${escHtml(e.name)}</div>
-      <div class="lb-pts">${e.score}</div>
-      <div class="lb-time">${formatTime(e.time_ms)}</div>
+      <div class="lb-pts">${parseInt(e.score)}</div>
+      <div class="lb-time">${formatTime(parseInt(e.time_ms))}</div>
     </div>`;
   });
   table.innerHTML=html;
